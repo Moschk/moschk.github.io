@@ -127,13 +127,13 @@
           // If lat/lng invalid, geocode by name
           if (isNaN(lat) || isNaN(lng)) {
             if (name && name.trim()) {
-              updateStatus(`Geocoding: ${name}...`);
+              // updateStatus(`Geocoding: ${name}...`);
               const coords = await getCoordinatesFromName(name);
               if (coords) {
                 lat = coords.lat;
                 lng = coords.lng;
                 geocodeCount++;
-                updateStatus(`✓ Found: [${lat}, ${lng}]`);
+                // updateStatus(`✓ Found: [${lat}, ${lng}]`);
               } else {
                 updateStatus(`✗ Geocoding failed for: ${name}`);
                 continue;
