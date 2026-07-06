@@ -2,19 +2,59 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>My Portfolio</title>
+  <title>GPS Map Visualization</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: Arial, sans-serif;
+    }
+    #map {
+      height: 600px;
+      border: 1px solid #ccc;
+    }
+    h1 {
+      margin-top: 0;
+    }
+  </style>
 </head>
 <body>
-  <h1>Welcome to My Site</h1>
-  
-  <!-- Your map goes here -->
-  <div id="map" style="height: 500px; width: 100%;"></div>
+  <h1>GPS Locations Map</h1>
+  <div id="map"></div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+  
   <script>
-    // Your map code here
+    // Initialize map centered on first location (Paris)
+    const map = L.map('map').setView([48.8566, 2.3522], 4);
+    
+    // Add tile layer (OpenStreetMap)
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors',
+      maxZoom: 19
+    }).addTo(map);
+
+    // Load and parse CSV
+    Papa.parse('sources/csv/gps_test.csv', {
+      download: true,
+      header: true,
+      complete: function(results) {
+        results.data.forEach(row => {
+          // Skip empty rows
+          if (row.lat && row.lng) {
+            // Create marker
+            const marker = L.marker([parseFloat(row.lat), parseFloat(row.lng)])
+              .bindPopup(`<b>${row.name}</b><br>${row.description}`)
+              .addTo(map);
+          }
+        });
+      },
+      error: function(error) {
+        console.error('Error parsing CSV:', error);
+      }
+    });
   </script>
 </body>
 </html>
