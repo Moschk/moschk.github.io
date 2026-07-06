@@ -32,7 +32,7 @@ jobs:
           echo "=== ELENCO DEI FILE IN SOURCES ==="
           ls -la sources || echo "La cartella sources non esiste qui!"
           echo "=== AVVIO DELLO SCRIPT ==="
-          node sources/geocode.js
+          node scripts/geocode.js
 
       # === NUOVO STEP DI DEBUG ===
       - name: Check generated files
