@@ -4,7 +4,8 @@ const Papa = require('papaparse');
 async function geocode(name) {
   try {
     // Aggiungiamo anche "Dolomiti" alla ricerca per aiutare Nominatim a essere più preciso con le montagne
-    const query = `${name}, Dolomites, Italy`;
+    //const query = `${name}, Dolomites, Italy`;
+    const query = `${name}, Italy`;
     const response = await fetch(
       `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`,
       { headers: { 'User-Agent': 'Alpinismo-Geocoder-App' } }
