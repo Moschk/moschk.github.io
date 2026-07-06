@@ -28,7 +28,7 @@
   </style>
 </head>
 <body>
-  <h1>Alpinismo - Locations Map</h1>
+  <h1>Dova vediamo che andiamo?</h1>
   <div id="map"></div>
   <div id="status">Loading...</div>
 
@@ -108,6 +108,7 @@
         const lngIndex = headers.indexOf('lng');
         const nameIndex = headers.indexOf('NOME CIMA');
         const noteIndex = headers.indexOf('NOTE');
+        const cnIndex = headers.indexOf('CN');
         
         updateStatus(`Columns - lat: ${latIndex}, lng: ${lngIndex}, name: ${nameIndex}, note: ${noteIndex}`);
         updateStatus('\n=== PROCESSING LOCATIONS ===');
@@ -123,6 +124,7 @@
           let lng = lngIndex >= 0 ? parseFloat(row[lngIndex]) : NaN;
           const name = nameIndex >= 0 ? row[nameIndex] : '';
           const note = noteIndex >= 0 ? row[noteIndex] : '';
+          const cn = noteIndex >= 0 ? row[cnIndex] : '';
           
           // If lat/lng invalid, geocode by name
           if (isNaN(lat) || isNaN(lng)) {
@@ -146,7 +148,7 @@
           // Add marker to map
           if (!isNaN(lat) && !isNaN(lng)) {
             L.marker([lat, lng])
-              .bindPopup(`<b>${name}</b><br>${note || 'No notes'}`)
+              .bindPopup(`<b>${cn || 'X'} - ${name}</b><br>${note || 'No notes'}`)
               .addTo(map);
             markerCount++;
           }
