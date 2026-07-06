@@ -26,6 +26,16 @@ jobs:
       - name: Run geocoder
         run: node geocode.js
 
+      # === NUOVO STEP DI DEBUG ===
+      - name: Check generated files
+        run: |
+          echo "=== Contenuto della cartella ==="
+          ls -la sources/csv/
+          echo "=== Stato di Git ==="
+          git status
+          echo "=== Anteprima prime 10 righe del file generato ==="
+          head -n 10 sources/csv/vie.csv || echo "File vie.csv non trovato!"
+
       - name: Commit updated CSV
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
