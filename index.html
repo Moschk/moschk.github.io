@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>GPS Map Visualization</title>
+  <title>GPS Map Visualization - Alpinismo</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <style>
     body {
@@ -20,7 +20,7 @@
   </style>
 </head>
 <body>
-  <h1>Dove possiamo andiamo?</h1>
+  <h1>Alpinismo - Locations Map</h1>
   <div id="map"></div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -40,9 +40,20 @@
     Papa.parse('sources/csv/gps_test.csv', {
       download: true,
       complete: function(results) {
-        // Skip first 6 metadata rows, use row 7 (index 6) as headers
+        console.log('Total rows:', results.data.length);
+        console.log('Row 6 (headers):', results.data[6]);
+        
+        // Get headers from row 6 (0-indexed)
         const headers = results.data[6];
+        
+        if (!headers) {
+          console.error('Headers not found at row 6');
+          return;
+        }
+        
+        // Get data rows starting from row 7
         const rows = results.data.slice(7);
+        console.log('Data rows:', rows.length);
         
         // Find column indices
         const latIndex = headers.indexOf('lat');
@@ -50,7 +61,11 @@
         const nameIndex = headers.indexOf('NOME CIMA');
         const noteIndex = headers.indexOf('NOTE');
         
-        rows.forEach(row => {
+        console.log('Column indices - lat:', latIndex, 'lng:', lngIndex, 'name:', nameIndex, 'note:', noteIndex);
+        
+        let markersAdded = 0;
+        
+        rows.forEach((row, idx) => {
           const lat = parseFloat(row[latIndex]);
           const lng = parseFloat(row[lngIndex]);
           const name = row[nameIndex];
@@ -61,8 +76,12 @@
             const marker = L.marker([lat, lng])
               .bindPopup(`<b>${name}</b><br>${note || 'No notes'}`)
               .addTo(map);
+            markersAdded++;
+            console.log(`Marker ${markersAdded}: ${name} at [${lat}, ${lng}]`);
           }
         });
+        
+        console.log('Total markers added:', markersAdded);
       },
       error: function(error) {
         console.error('Error parsing CSV:', error);
