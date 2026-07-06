@@ -24,7 +24,15 @@ jobs:
         run: npm install
 
       - name: Run geocoder
-        run: node sources/geocode.js
+        run: |
+          echo "=== DOVE MI TROVO ADESSO? ==="
+          pwd
+          echo "=== ELENCO DEI FILE NELLA ROOT ==="
+          ls -la
+          echo "=== ELENCO DEI FILE IN SOURCES ==="
+          ls -la sources || echo "La cartella sources non esiste qui!"
+          echo "=== AVVIO DELLO SCRIPT ==="
+          node sources/geocode.js
 
       # === NUOVO STEP DI DEBUG ===
       - name: Check generated files
