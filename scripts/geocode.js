@@ -18,7 +18,7 @@ async function geocode(name) {
 }
 
 (async () => {
-  const csv = fs.readFileSync('sources/csv/vie.csv', 'utf-8');
+  const csv = fs.readFileSync('sources/csv/viee.csv', 'utf-8');
   // header: true treats the first row as column names
   const parsed = Papa.parse(csv, { header: true }); 
   const data = parsed.data;
@@ -38,6 +38,6 @@ async function geocode(name) {
   }
 
   const updatedCsv = Papa.unparse(data);
-  fs.writeFileSync('sources/csv/gps_test.csv', updatedCsv);
+  fs.writeFileSync('sources/csv/vie.csv', updatedCsv);
   console.log('CSV update complete.');
 })();
