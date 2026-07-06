@@ -27,8 +27,8 @@
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
   
   <script>
-    // Initialize map centered on first location (Paris)
-    const map = L.map('map').setView([48.8566, 2.3522], 4);
+    // Initialize map
+    const map = L.map('map').setView([46.5, 12.2], 7);
     
     // Add tile layer (OpenStreetMap)
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -37,16 +37,29 @@
     }).addTo(map);
 
     // Load and parse CSV
-    Papa.parse('sources/csv/vie.csv', {
+    Papa.parse('sources/csv/gps_test.csv', {
       download: true,
-      header: true,
       complete: function(results) {
-        results.data.forEach(row => {
-          // Skip empty rows
-          if (row.lat && row.lng) {
-            // Create marker
-            const marker = L.marker([parseFloat(row.lat), parseFloat(row.lng)])
-              .bindPopup(`<b>${row.name}</b><br>${row.description}`)
+        // Skip first 6 metadata rows, use row 7 (index 6) as headers
+        const headers = results.data[6];
+        const rows = results.data.slice(7);
+        
+        // Find column indices
+        const latIndex = headers.indexOf('lat');
+        const lngIndex = headers.indexOf('lng');
+        const nameIndex = headers.indexOf('NOME CIMA');
+        const noteIndex = headers.indexOf('NOTE');
+        
+        rows.forEach(row => {
+          const lat = parseFloat(row[latIndex]);
+          const lng = parseFloat(row[lngIndex]);
+          const name = row[nameIndex];
+          const note = row[noteIndex];
+          
+          // Only create marker if lat/lng are valid numbers
+          if (!isNaN(lat) && !isNaN(lng) && lat && lng) {
+            const marker = L.marker([lat, lng])
+              .bindPopup(`<b>${name}</b><br>${note || 'No notes'}`)
               .addTo(map);
           }
         });
