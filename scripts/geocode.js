@@ -3,9 +3,10 @@ const Papa = require('papaparse');
 
 async function geocode(name) {
   try {
-    // We add a polite custom User-Agent as required by Nominatim's TOS
+    // Aggiungiamo anche "Dolomiti" alla ricerca per aiutare Nominatim a essere più preciso con le montagne
+    const query = `${name}, Dolomites, Italy`;
     const response = await fetch(
-      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(name)}`,
+      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`,
       { headers: { 'User-Agent': 'Alpinismo-Geocoder-App' } }
     );
     const data = await response.json();
@@ -13,48 +14,72 @@ async function geocode(name) {
       return { lat: data[0].lat, lng: data[0].lon };
     }
   } catch (error) {
-    console.error(`Failed to geocode "${name}":`, error);
+    console.error(`Errore durante il geocoding di "${name}":`, error);
   }
   return null;
 }
 
 (async () => {
-  const inputPath = 'sources/csv/vie_t.csv';  // FIXED: Point to your actual source file
-  const outputPath = 'sources/csv/vie.csv';   // Point to your output destination
+  const inputPath = 'sources/csv/vie_t.csv';
+  const outputPath = 'sources/csv/vie.csv';
 
   if (!fs.existsSync(inputPath)) {
-    console.error(`Error: Source file not found at ${inputPath}`);
+    console.error(`Errore: File sorgente non trovato in ${inputPath}`);
     process.exit(1);
   }
 
-  const csv = fs.readFileSync(inputPath, 'utf-8');
+  const rawContent = fs.readFileSync(inputPath, 'utf-8');
   
-  // skipEmptyLines: true ignores trailing blank rows that break scripts
-  const parsed = Papa.parse(csv, { header: true, skipEmptyLines: true }); 
-  const data = parsed.data;
+  // Dividiamo il file in righe per saltare i commenti iniziali dell'alpinismo
+  const lines = rawContent.split(/\r?\n/);
+  
+  // Trova l'indice della riga che contiene l'intestazione effettiva delle colonne
+  const headerIndex = lines.findIndex(line => line.includes('NOME CIMA') && line.includes('VIA'));
+  
+  if (headerIndex === -1) {
+    console.error("Errore: Impossibile trovare la riga di intestazione (CN, Grado, NOME CIMA...) nel CSV.");
+    process.exit(1);
+  }
 
-  console.log(`Loaded ${data.length} rows. Starting geocoding...`);
+  // Conserviamo le righe di commento iniziali per poterle riscrivere identiche nel file finale
+  const commentHeader = lines.slice(0, headerIndex).join('\n') + '\n';
+  
+  // Uniamo il resto del CSV (dall'intestazione in poi) per passarlo a PapaParse
+  const csvDataToParse = lines.slice(headerIndex).join('\n');
+
+  const parsed = Papa.parse(csvDataToParse, { 
+    header: true, 
+    skipEmptyLines: true 
+  }); 
+  
+  const data = parsed.data;
+  console.log(`Caricate ${data.length} vie alpine. Inizio geocoding...`);
 
   for (let row of data) {
-    // Checks if 'name' exists and coordinates are missing/empty
-    if (row.name && (!row.latitude || !row.longitude || row.latitude.trim() === '')) {
-      console.log(`Geocoding: ${row.name}`);
-      const coords = await geocode(row.name);
+    const nomeCima = row['NOME CIMA'];
+    
+    // Controlla se la cima ha un nome e se mancano le coordinate lat/lng
+    if (nomeCima && (!row['lat'] || !row['lng'] || row['lat'].trim() === '')) {
+      console.log(`Geocoding in corso per: ${nomeCima}`);
+      const coords = await geocode(nomeCima);
       
       if (coords) {
-        row.latitude = coords.lat;
-        row.longitude = coords.lng;
-        console.log(`   Found: ${coords.lat}, ${coords.lng}`);
+        row['lat'] = coords.lat;
+        row['lng'] = coords.lng;
+        console.log(`   Trovato: ${coords.lat}, ${coords.lng}`);
       } else {
-        console.log(`   Result not found for: ${row.name}`);
+        console.log(`   Nessun risultato per: ${nomeCima}`);
       }
       
-      // Respect Nominatim's usage policy (strictly max 1 request per second)
+      // Rispetta la policy di Nominatim (massimo 1 richiesta al secondo)
       await new Promise(resolve => setTimeout(resolve, 1100));
     }
   }
 
-  const updatedCsv = Papa.unparse(data);
-  fs.writeFileSync(outputPath, updatedCsv);
-  console.log(`Success! Updated CSV saved to: ${outputPath}`);
+  // Ricreiamo il CSV unendo i commenti iniziali con i dati aggiornati
+  const updatedCsvRows = Papa.unparse(data);
+  const finalCsvContent = commentHeader + updatedCsvRows;
+
+  fs.writeFileSync(outputPath, finalCsvContent);
+  console.log(`Successo! Il nuovo CSV con le coordinate è stato salvato in: ${outputPath}`);
 })();
