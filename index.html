@@ -29,6 +29,10 @@
 </head>
 <body>
   <h1>Dova vediamo che andiamo?</h1>
+  <button onclick="clearCache()" style="padding: 10px; margin-bottom: 10px; background: #ff6b6b; color: white; border: none; border-radius: 5px; cursor: pointer;">
+  Ricarica punti su mappa
+  </button>
+  
   <div id="map"></div>
   <div id="status">Loading...</div>
 
@@ -68,6 +72,12 @@
         console.error(`Geocoding failed for "${name}":`, error);
         return null;
       }
+    }
+
+    // Clear cache for locations
+    function clearCache() {
+      localStorage.removeItem('geocodeCache');
+      location.reload();
     }
 
     // Update status
