@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-  <title>GPS Map Visualization - Alpinismo</title>
+  <title>Proposte Alpinistiche Sconce</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <style>
     body {
@@ -31,6 +31,9 @@
       overflow-y: auto;      /* evita che il log allunghi la pagina all'infinito */
       white-space: pre-wrap; /* evita overflow orizzontale su testi lunghi */
     }
+    #status.collapsed {
+      display: none;
+    }
     button {
       width: 100%;           /* più facile da toccare su mobile */
       padding: 12px;
@@ -49,14 +52,26 @@
     }
   </style>
 </head>
+  
+   _____                  ______  _____________   __
+  /  ___|                 | ___ \|  _  |  _  \ \ / /
+  \ `--.  _____  ___   _  | |_/ /| | | | | | |\ V / 
+   `--. \/ _ \ \/ / | | | | ___ \| | | | | | | \ /  
+  /\__/ /  __/>  <| |_| | | |_/ /\ \_/ / |/ /  | |  
+  \____/ \___/_/\_\\__, | \____/  \___/|___/   \_/  
+                    __/ |                           
+                   |___/                            
 <body>
-  <h1>Dova vediamo che andiamo?</h1>
+  <h1>Dove vediamo che andiamo?</h1>
   <button onclick="clearCache()">
   Ricarica punti su mappa
   </button>
   
   <div id="map"></div>
-  <div id="status">Loading...</div>
+  <button onclick="toggleStatus()" id="toggleBtn" style="padding: 8px; margin-bottom: 10px; background: #ddd; border: none; border-radius: 5px; cursor: pointer; font-size: 14px;">
+  Mostra log ▼
+  </button>
+  <div id="status" class="collapsed">Loading...</div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
@@ -100,6 +115,14 @@
     function clearCache() {
       localStorage.removeItem('geocodeCache');
       location.reload();
+    }
+
+    // Toggle status visualization
+    function toggleStatus() {
+      const status = document.getElementById('status');
+      const btn = document.getElementById('toggleBtn');
+      status.classList.toggle('collapsed');
+      btn.textContent = status.classList.contains('collapsed') ? 'Mostra log ▼' : 'Nascondi log ▲';
     }
 
     // Update status
