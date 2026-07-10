@@ -67,6 +67,12 @@
   <button onclick="clearCache()">
   Ricarica punti su mappa
   </button>
+  <div id="filters" style="margin-bottom: 10px; font-family: Arial, sans-serif;">
+    <label style="margin-right: 12px;"><input type="checkbox" class="cn-filter" value="A" checked> A</label>
+    <label style="margin-right: 12px;"><input type="checkbox" class="cn-filter" value="B" checked> B</label>
+    <label style="margin-right: 12px;"><input type="checkbox" class="cn-filter" value="C" checked> C</label>
+    <label><input type="checkbox" class="cn-filter" value="Others" checked> Others</label>
+  </div>
   
   <div id="map"></div>
   <button onclick="toggleStatus()" id="toggleBtn" style="padding: 8px; margin-bottom: 10px; background: #ddd; border: none; border-radius: 5px; cursor: pointer; font-size: 14px;">
@@ -80,6 +86,7 @@
   <script>
     const statusDiv = document.getElementById('status');
     let markerCount = 0;
+    let allMarkers = []; // { marker, category }
     let geocodeCount = 0;
 
     // Initialize map
@@ -126,6 +133,24 @@
       btn.textContent = status.classList.contains('collapsed') ? 'Mostra log ▼' : 'Nascondi log ▲';
     }
 
+    function applyFilters() {
+      const checked = Array.from(document.querySelectorAll('.cn-filter:checked'))
+        .map(cb => cb.value);
+    
+      allMarkers.forEach(({ marker, category }) => {
+        if (checked.includes(category)) {
+          if (!map.hasLayer(marker)) marker.addTo(map);
+        } else {
+          if (map.hasLayer(marker)) map.removeLayer(marker);
+        }
+      });
+    }
+    
+    // Collega i checkbox alla funzione di filtro
+    document.querySelectorAll('.cn-filter').forEach(cb => {
+      cb.addEventListener('change', applyFilters);
+    });
+    
     // Update status
     function updateStatus(msg) {
       console.log(msg);
@@ -203,12 +228,18 @@
           
           // Add marker to map
           if (!isNaN(lat) && !isNaN(lng)) {
-            L.marker([lat, lng])
-              .bindPopup(`<b>${cn || 'X'} - ${name}</b><br>${note || 'No notes'}`, { maxWidth: 250, minWidth: 150 })
-              .addTo(map);
+            const marker = L.marker([lat, lng])
+              .bindPopup(`<b>${cn || 'X'} - ${name}</b><br>${note || 'No notes'}`, { maxWidth: 250, minWidth: 150 });
+          
+            // Normalizza la categoria: se non è A, B o C, va in "Others"
+            const cnValue = (cn || '').trim().toUpperCase();
+            const category = ['A', 'B', 'C'].includes(cnValue) ? cnValue : 'Others';
+          
+            allMarkers.push({ marker, category });
             markerCount++;
           }
         }
+        applyFilters(); // mostra tutti i punti secondo lo stato iniziale dei checkbox
         
         updateStatus(`\n=== COMPLETE ===`);
         updateStatus(`Markers added: ${markerCount}`);
