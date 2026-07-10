@@ -98,6 +98,30 @@
       maxZoom: 19
     }).addTo(map);
 
+    // Marker icons initializations
+    const iconSize = [32, 32];      // larghezza, altezza in pixel — regola secondo le tue immagini
+    const iconAnchor = [16, 32];    // punto dell'icona che "punta" esattamente sulle coordinate (di solito centro-basso)
+    const popupAnchor = [0, -32];   // da dove parte il popup rispetto all'icona
+    
+    const icons = {
+      A: L.icon({
+        iconUrl: 'sources/img/icons/icon-a.png',
+        iconSize, iconAnchor, popupAnchor
+      }),
+      B: L.icon({
+        iconUrl: 'sources/img/icons/icon-b.png',
+        iconSize, iconAnchor, popupAnchor
+      }),
+      C: L.icon({
+        iconUrl: 'sources/img/icons/icon-c.png',
+        iconSize, iconAnchor, popupAnchor
+      }),
+      Others: L.icon({
+        iconUrl: 'sources/img/icons/icon-others.png',
+        iconSize, iconAnchor, popupAnchor
+      })
+    };
+    
     // Geocode location by name using Nominatim
     async function getCoordinatesFromName(name) {
       try {
@@ -237,12 +261,12 @@
               popupContent += `<br><a href="${link}" target="_blank" rel="noopener noreferrer" style="display:inline-block; margin-top:6px; padding:4px 10px; background:#4a90d9; color:white; text-decoration:none; border-radius:4px; font-size:12px;">🔗 Apri risorsa</a>`;
             }
           
-            const marker = L.marker([lat, lng])
-              .bindPopup(popupContent, { maxWidth: 250, minWidth: 150 });
-          
             // Normalizza la categoria: se non è A, B o C, va in "Others"
             const cnValue = (cn || '').trim().toUpperCase();
             const category = ['A', 'B', 'C'].includes(cnValue) ? cnValue : 'Others';
+
+            const marker = L.marker([lat, lng], { icon: icons[category] })
+              .bindPopup(popupContent, { maxWidth: 250, minWidth: 150 });
           
             allMarkers.push({ marker, category });
             markerCount++;
