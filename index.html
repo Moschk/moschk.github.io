@@ -188,6 +188,7 @@
         const latIndex = headers.indexOf('lat');
         const lngIndex = headers.indexOf('lng');
         const nameIndex = headers.indexOf('NOME CIMA');
+        const risorseIndex = headers.findIndex(h => h && h.toLowerCase().startsWith('risors'));
         const noteIndex = headers.indexOf('NOTE');
         const cnIndex = headers.indexOf('CN');
         
@@ -204,6 +205,7 @@
           let lat = latIndex >= 0 ? parseFloat(row[latIndex]) : NaN;
           let lng = lngIndex >= 0 ? parseFloat(row[lngIndex]) : NaN;
           const name = nameIndex >= 0 ? row[nameIndex] : '';
+          const risorse = risorseIndex >= 0 ? row[risorseIndex] : '';
           const note = noteIndex >= 0 ? row[noteIndex] : '';
           const cn = noteIndex >= 0 ? row[cnIndex] : '';
           
@@ -228,8 +230,15 @@
           
           // Add marker to map
           if (!isNaN(lat) && !isNaN(lng)) {
+            let popupContent = `<b>${cn || 'X'} - ${name}</b><br>${note || 'No notes'}`;
+          
+            const link = (risorse || '').trim();
+            if (link && (link.startsWith('http://') || link.startsWith('https://'))) {
+              popupContent += `<br><a href="${link}" target="_blank" rel="noopener noreferrer" style="display:inline-block; margin-top:6px; padding:4px 10px; background:#4a90d9; color:white; text-decoration:none; border-radius:4px; font-size:12px;">🔗 Apri risorsa</a>`;
+            }
+          
             const marker = L.marker([lat, lng])
-              .bindPopup(`<b>${cn || 'X'} - ${name}</b><br>${note || 'No notes'}`, { maxWidth: 250, minWidth: 150 });
+              .bindPopup(popupContent, { maxWidth: 250, minWidth: 150 });
           
             // Normalizza la categoria: se non è A, B o C, va in "Others"
             const cnValue = (cn || '').trim().toUpperCase();
