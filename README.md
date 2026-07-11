@@ -10,4 +10,6 @@ Vibe codato tutto come una bestia con bava alla bocca.
 
 ## 2 - Il file *vie.csv* viene letto da riga 7 in poi (circa) per usare ogni riga come sorgente per la creazione dei punti sulla mappa.
 
-## C - da continuare - momentaneamente WIP
+## 3 - Ci sono dei filtri sulla colonna della difficolta' interna (colonna CN). 
+
+## 4 - Le icone dei marker sono state messe personalizzate perche' si. Sono calcolate in base al grado CN.
